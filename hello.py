@@ -1,3 +1,10 @@
-# My first Python file - Building something revolutionary!
-print("Hello! I am Anto and this is the beginning of my HealthApp!")
-print("Today is day 1 of my journey.")
+# HealthApp - Patient Information
+patient_name = "John Kamau"
+patient_age = 25
+patient_location = "Nairobi"
+emergency_type = "Road Accident"
+
+print("Patient Name:", patient_name)
+print("Age:", patient_age)
+print("Location:", patient_location)
+print("Emergency:", emergency_type)
