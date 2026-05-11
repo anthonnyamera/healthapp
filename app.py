@@ -1,7 +1,7 @@
 # HealthApp - Main Application
-# Combines everything into one flow
-
 import datetime
+import json
+import os
 
 def get_timestamp():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -30,9 +30,7 @@ def who_needs_help():
     print("1. Someone near me is injured (Bystander)")
     print("2. I am injured (Patient)")
     print("-" * 45)
-    
     choice = input("Enter 1 or 2: ")
-    
     if choice == "1":
         return "bystander"
     elif choice == "2":
@@ -52,15 +50,12 @@ def select_emergency():
     print("3. Fire")
     print("4. Other (describe your own)")
     print("-" * 45)
-    
     choice = input("Enter 1, 2, 3 or 4: ")
-    
     emergencies = {
         "1": "Road Accident",
         "2": "Medical Emergency",
         "3": "Fire"
     }
-    
     if choice in emergencies:
         return emergencies[choice]
     elif choice == "4":
@@ -76,9 +71,7 @@ def select_emergency():
 def get_patient_profile():
     print("\n" + "=" * 45)
     print("   YOUR MEDICAL PROFILE")
-    print("Loading your saved profile...")
     print("=" * 45)
-    
     name = input("Your full name: ")
     blood_type = input("Blood type (A+, B-, O+, etc): ")
     conditions = input("Any conditions (diabetes/asthma/none): ")
@@ -86,7 +79,6 @@ def get_patient_profile():
     allergies = input("Allergies to medicine (or none): ")
     contact_name = input("Emergency contact name: ")
     contact_phone = input("Emergency contact phone: ")
-    
     return {
         "name": name,
         "blood_type": blood_type,
@@ -97,7 +89,22 @@ def get_patient_profile():
     }
 
 # ================================
-# STEP 5: SEND ALERT
+# STEP 5: SAVE ALERT TO FILE
+# ================================
+def save_alert(alert_data):
+    filename = "emergencies.json"
+    if os.path.exists(filename):
+        with open(filename, "r") as f:
+            all_alerts = json.load(f)
+    else:
+        all_alerts = []
+    all_alerts.append(alert_data)
+    with open(filename, "w") as f:
+        json.dump(all_alerts, f, indent=4)
+    print(f"\nAlert saved! Total alerts on record: {len(all_alerts)}")
+
+# ================================
+# STEP 6: SEND ALERT
 # ================================
 def send_alert(caller_type, emergency_type, profile=None):
     print("\n" + "=" * 45)
@@ -108,7 +115,6 @@ def send_alert(caller_type, emergency_type, profile=None):
     print(f"Emergency    : {emergency_type}")
     print(f"Location     : Nairobi, Kenya (GPS)")
     print(f"Time         : {get_timestamp()}")
-    
     if profile:
         print("-" * 45)
         print("PATIENT MEDICAL PROFILE:")
@@ -118,7 +124,6 @@ def send_alert(caller_type, emergency_type, profile=None):
         print(f"Medications  : {profile['medications']}")
         print(f"Allergies    : {profile['allergies']}")
         print(f"Contact      : {profile['emergency_contact']}")
-    
     print("=" * 45)
     print("Status       : ACTIVE")
     print("Ambulance    : Dispatched")
@@ -126,16 +131,25 @@ def send_alert(caller_type, emergency_type, profile=None):
     print("=" * 45)
     print("\nHelp is on the way! Stay calm.")
     print("A doctor will connect with you shortly.")
+    
+    # Save the alert
+    alert_data = {
+        "alert_id": get_alert_id(),
+        "caller_type": caller_type,
+        "emergency_type": emergency_type,
+        "location": "Nairobi, Kenya",
+        "time": get_timestamp(),
+        "profile": profile
+    }
+    save_alert(alert_data)
 
 # ================================
-# MAIN APP - RUNS EVERYTHING
+# MAIN APP
 # ================================
 def run_app():
     welcome_screen()
-    
     caller = who_needs_help()
     emergency = select_emergency()
-    
     if caller == "patient":
         profile = get_patient_profile()
         send_alert(caller, emergency, profile)
